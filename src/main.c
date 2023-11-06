@@ -12,19 +12,15 @@
 
 /* Misc variables */
 int reboot_count;   // TODO: get from FLASH
-#define SYSTIMER_DUR 100000     // Config of system timer for background processses, in usec (100 ms)
-#define BATTERY_THRESHOLD 20    // Min battery voltage value, below which mode -> CHARGING
-volatile uint16_t flagBits = 0; // Seperate def. from declaration
-
+#define SYSTIMER_DUR 100000     // Config. of system timer in usec (100 ms)
+#define BATTERY_THRESHOLD 20    // Min. battery voltage value, below which mode: CHARGING
+volatile uint16_t flagBits = 0; // Separate def. from declaration
 jmp_buf toModeSelect;
 
-// Global variables to track ISR calls
-volatile int sys_handler_count = 0;
+volatile int sys_handler_count = 0;	// Track ISR calls
 volatile int task_handler_count = 0;
 
-//volatile struct Task currTask;
-
-// Prototypes
+/* Prototypes */
 void system_ISR_handler();
 void task_ISR_handler();
 
@@ -52,7 +48,10 @@ void loadBackups()
     printf("Loading Backups\n");
 }
 
-// Block the specified signal
+/*
+ * block_signal - add signals to curr. process blocked signals
+ * @param signal: signal to block
+ */
 void block_signal(int signal)
 {
     // Define set of signals to block
@@ -69,6 +68,10 @@ void block_signal(int signal)
 }
 
 // Unblock a given signal
+/*
+ * unblock_signal - remove signals from process blocked set
+ * @param signal: signal to unblock
+ */
 void unblock_signal(int signal)
 {
     // Define set of signals to unblock
@@ -102,7 +105,6 @@ void system_ISR_handler(int signal)
     sys_handler_count++;
     unblock_signal(SIGALRM);
 
-    //printf("**System ISR handler**\n");
     statusCheck();
 
     // Unblock task ISRs
@@ -122,14 +124,11 @@ void task_ISR_handler(int signal)
         return;
     }
 
-  //  printf("___________in Task ISR___________\n");
-
     // Block other signals of the same type before updating count
     block_signal(SIGVTALRM);
     task_handler_count++;
     unblock_signal(SIGVTALRM);
 
-    //printf("------Task ISR handler------\n");
     int old_task_id = currTask.task_id;
 
     // Poll Sensors
@@ -146,7 +145,7 @@ void task_ISR_handler(int signal)
     siglongjmp(toModeSelect, flagBits);
 }
 
-/* Run main() func., superloop after timer setup */
+/* Run superloop */
 int main() 
 {
     if (!IS_BIT_SET(flagBits, START)) {
@@ -177,9 +176,6 @@ int main()
     // Install task_ISR_handler as signal handler for virtual (task) alarms
     task.sa_handler = &task_ISR_handler;
     sigaction(SIGVTALRM, &task, NULL);
-
-    // // Configure task timer
-    // TODO: need to do intervals?
 
     /* Set up rand function for testing */
 	srand(2);

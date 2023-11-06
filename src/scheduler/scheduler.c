@@ -23,7 +23,8 @@ volatile struct Task currTask;
 
 /*
  * systemsCheck - update mode bits
- * TODO: Add in additional conditions for selecting modes, ex. detumble needs coils to be working
+ * TODO: Add in additional conditions for selecting modes
+ * 	(ex. detumble needs coils to be working)
  */
 void systemsCheck() 
 {
