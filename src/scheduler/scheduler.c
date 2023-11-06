@@ -9,11 +9,11 @@
 // TODO: update ECC mode based on discussions with ELEC
 // RS - system, Hamming codes on Idle
 const struct Task taskTable[] = {
-	{CHARGING, 20, 10000, configCharging, charging, cleanCharging},
-	{DETUMBLE, 20,10000, configDetumble, detumble, cleanDetumble},
-	{COMMS, 200, 500, configComms, comms, cleanComms},
-    {HDD, 40000, 200, configHdd, hdd, cleanHdd},
-	{MRW, 60000, 100, configMrw, mrw, cleanMrw}, 
+	{CHARGING, 50000, 10000, configCharging, charging, cleanCharging},
+	{DETUMBLE, 50000,10000, configDetumble, detumble, cleanDetumble},
+	{COMMS, 100000, 500, configComms, comms, cleanComms},
+    {HDD, 100000, 200, configHdd, hdd, cleanHdd},
+	{MRW, 100000, 100, configMrw, mrw, cleanMrw},
     {ECC, 60000, 200, configEcc, ecc, cleanEcc}
 };
 
@@ -26,7 +26,7 @@ volatile struct Task currTask;
  * TODO: Add in additional conditions for selecting modes
  * 	(ex. detumble needs coils to be working)
  */
-void systemsCheck() 
+void systemsCheck()
 {
     statusCheck(); // CHARGING flag updated in statusCheck()
 
