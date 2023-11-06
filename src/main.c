@@ -198,7 +198,10 @@ int main()
         
         // Configure task timer
         task_timer.it_value.tv_sec = 0;
-        task_timer.it_value.tv_usec = currTask.timerDuration;
+
+        // Ensure first alarm fires before sys ISR triggers
+        task_timer.it_value.tv_usec = 100;	// rather than currTask.timerDuration
+
         task_timer.it_interval.tv_sec = 0;
         task_timer.it_interval.tv_usec = currTask.timerDuration;
 
