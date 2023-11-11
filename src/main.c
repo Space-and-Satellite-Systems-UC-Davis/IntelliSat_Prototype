@@ -19,6 +19,7 @@ jmp_buf toModeSelect;
 
 volatile int sys_handler_count = 0;	// Track ISR calls
 volatile int task_handler_count = 0;
+volatile int currentTaskInterrupts = 0;
 
 /* Prototypes */
 void system_ISR_handler();
@@ -126,6 +127,7 @@ void task_ISR_handler(int signal)
 
     // Block other signals of the same type before updating count
     block_signal(SIGVTALRM);
+    currentTaskInterrupts++;
     task_handler_count++;
     unblock_signal(SIGVTALRM);
 
@@ -135,9 +137,13 @@ void task_ISR_handler(int signal)
     systemsCheck();
     modeSelect();
 
-    if (old_task_id == currTask.task_id) {
+    if (
+        old_task_id == currTask.task_id &&
+        currentTaskInterrupts < currTask.taskInterrupts
+    ) {
         return;
     } else {
+        currentTaskInterrupts = 0;
         taskTable[old_task_id].cleanPtr();
     }
 
