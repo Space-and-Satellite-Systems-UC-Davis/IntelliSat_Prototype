@@ -13,6 +13,7 @@
 /* Misc variables */
 int reboot_count;   // TODO: get from FLASH
 #define SYSTIMER_DUR 100000     // Config. of system timer in usec (100 ms)
+#define SYSTICK_DUR_U 1000        // Config. of systick timer in usec (1 ms)
 #define BATTERY_THRESHOLD 20    // Min. battery voltage value, below which mode: CHARGING
 volatile uint16_t flagBits = 0; // Separate def. from declaration
 jmp_buf toModeSelect;
@@ -20,6 +21,9 @@ jmp_buf toModeSelect;
 volatile int sys_handler_count = 0;	// Track ISR calls
 volatile int task_handler_count = 0;
 volatile int currentTaskInterrupts = 0;
+
+// Temp working var
+int systick_time;
 
 /* Prototypes */
 void system_ISR_handler();
@@ -49,107 +53,73 @@ void loadBackups()
     printf("Loading Backups\n");
 }
 
-/*
- * block_signal - add signals to curr. process blocked signals
- * @param signal: signal to block
- */
-void block_signal(int signal)
-{
-    // Define set of signals to block
-    sigset_t sigset;
-
-    // Initialize set to 0
-    sigemptyset(&sigset);
-
-    // Add given signal to set
-    sigaddset(&sigset, signal);
-
-    // Add sigset signals to process' blocked signals
-    sigprocmask(SIG_BLOCK, &sigset, NULL); 
+void sysTick_Handler(int signal) {
+    systick_time++;
+    scheduler(signal);
 }
 
-// Unblock a given signal
-/*
- * unblock_signal - remove signals from process blocked set
- * @param signal: signal to unblock
- */
-void unblock_signal(int signal)
-{
-    // Define set of signals to unblock
-    sigset_t sigset;
+// /*
+//  * system_ISR_handler - ISR for system/background tasks
+//  * (reflects kernel level code, for ECC, sensor polling, hardware checks)
+//  */
+// void system_ISR_handler(int signal)
+// {
+//    if(signal != SIGALRM) {
+//     return;
+//    }
 
-    // Initialize set to 0
-    sigemptyset(&sigset);
+//     // Block task ISRs
+//     block_signal(SIGVTALRM);
 
-    // Add signal to set
-    sigaddset(&sigset, signal);
+//     // Block other signals of the same type before updating count
+//     block_signal(SIGALRM);
+//     sys_handler_count++;
+//     unblock_signal(SIGALRM);
 
-    // Remove set signals from blocked signals
-    sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-}
+//     statusCheck();
 
-/*
- * system_ISR_handler - ISR for system/background tasks
- * (reflects kernel level code, for ECC, sensor polling, hardware checks)
- */
-void system_ISR_handler(int signal)
-{
-   if(signal != SIGALRM) {
-    return;
-   }
+//     // Unblock task ISRs
+//     unblock_signal(SIGVTALRM);
 
-    // Block task ISRs
-    block_signal(SIGVTALRM);
+//     // siglongjmp(toModeSelect, flagBits);
+// }
 
-    // Block other signals of the same type before updating count
-    block_signal(SIGALRM);
-    sys_handler_count++;
-    unblock_signal(SIGALRM);
+// /*
+//  * taskISR - used for preempting mode, based on varied time slice
+//  * (access to currTask, taskTable, etc possible through scheduler/scheduler.h)
+//  * TODO: Will go into interrupt handler file.
+//  */
+// void task_ISR_handler(int signal)
+// {
+//     if(signal != SIGVTALRM) {
+//         return;
+//     }
 
-    statusCheck();
+//     // Block other signals of the same type before updating count
+//     block_signal(SIGVTALRM);
+//     currentTaskInterrupts++;
+//     task_handler_count++;
+//     unblock_signal(SIGVTALRM);
 
-    // Unblock task ISRs
-    unblock_signal(SIGVTALRM);
+//     int old_task_id = currTask.task_id;
 
-    // siglongjmp(toModeSelect, flagBits);
-}
+//     // Poll Sensors
+//     systemsCheck();
+//     modeSelect();
 
-/*
- * taskISR - used for preempting mode, based on varied time slice
- * (access to currTask, taskTable, etc possible through scheduler/scheduler.h)
- * TODO: Will go into interrupt handler file.
- */
-void task_ISR_handler(int signal)
-{
-    if(signal != SIGVTALRM) {
-        return;
-    }
+//     if (
+//         old_task_id == currTask.task_id &&
+//         currentTaskInterrupts < currTask.taskInterrupts
+//     ) {
+//         return;
+//     } else {
+//         currentTaskInterrupts = 0;
+//         taskTable[old_task_id].cleanPtr();
+//     }
 
-    // Block other signals of the same type before updating count
-    block_signal(SIGVTALRM);
-    currentTaskInterrupts++;
-    task_handler_count++;
-    unblock_signal(SIGVTALRM);
-
-    int old_task_id = currTask.task_id;
-
-    // Poll Sensors
-    systemsCheck();
-    modeSelect();
-
-    if (
-        old_task_id == currTask.task_id &&
-        currentTaskInterrupts < currTask.taskInterrupts
-    ) {
-        return;
-    } else {
-        currentTaskInterrupts = 0;
-        taskTable[old_task_id].cleanPtr();
-    }
-
-    // Jmp using flagBits
-    siglongjmp(toModeSelect, flagBits);
-}
+//     // Jmp using flagBits
+//     siglongjmp(toModeSelect, flagBits);
+// }
 
 /* Run superloop */
 int main() 
@@ -162,26 +132,18 @@ int main()
 
     /* System handler, timer setup */
     // Define signal handler and timer
-    struct sigaction sys;
-    struct itimerval sys_timer;
+    struct sigaction sysTick;
+    struct itimerval sysTick_timer;
 
     // Install custom ISR as handler for SIGALRM
-    sys.sa_handler = &system_ISR_handler;
-    sigaction(SIGALRM, &sys, NULL);
+    sysTick.sa_handler = &sysTick_Handler;
+    sigaction(SIGALRM, &sysTick, NULL);
 
     // Configure and start sys timer
-    sys_timer.it_value.tv_sec = 0;
-    sys_timer.it_value.tv_usec = SYSTIMER_DUR;
-    sys_timer.it_interval.tv_sec = 0;
-    sys_timer.it_interval.tv_usec = SYSTIMER_DUR;
-
-    /* Task handler, timer setup */
-    struct sigaction task;
-    struct itimerval task_timer;
-
-    // Install task_ISR_handler as signal handler for virtual (task) alarms
-    task.sa_handler = &task_ISR_handler;
-    sigaction(SIGVTALRM, &task, NULL);
+    sysTick_timer.it_value.tv_sec = 0;
+    sysTick_timer.it_value.tv_usec = SYSTICK_DUR_U;
+    sysTick_timer.it_interval.tv_sec = 0;
+    sysTick_timer.it_interval.tv_usec = SYSTICK_DUR_U;
 
     /* Set up rand function for testing */
 	srand(2);
@@ -194,27 +156,15 @@ int main()
     flagBits = sigsetjmp(toModeSelect, 1);
 
     /* Start sys timer */
-    setitimer(ITIMER_REAL, &sys_timer, NULL);
+    setitimer(ITIMER_REAL, &sysTick_timer, NULL);
 
     /* Run superloop */
     while (1) {
         printf("\n");
 
         modeSelect();
-        
-        // Configure task timer
-        task_timer.it_value.tv_sec = 0;
-
-        // Ensure first alarm fires before sys ISR triggers
-        task_timer.it_value.tv_usec = 100;	// rather than currTask.timerDuration
-
-        task_timer.it_interval.tv_sec = 0;
-        task_timer.it_interval.tv_usec = currTask.timerDuration;
 
     	printf("ID: %d\n", currTask.task_id);
-
-        // Start virtual time for task
-        setitimer(ITIMER_VIRTUAL, &task_timer, NULL);
 
         currTask.runPtr();  // usleep(rand) done here
 
@@ -223,8 +173,7 @@ int main()
 	    CLR_BIT(flagBits, currTask.task_id);
         systemsCheck();
 
-        printf("sys_handler_count: %d\n", sys_handler_count);
-        printf("task_handler_count: %d\n", task_handler_count);
+        printf("sysTick_handler_count: %d\n", systick_time);
     }
 
     return 0;
