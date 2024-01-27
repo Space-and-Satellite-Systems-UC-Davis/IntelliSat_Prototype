@@ -23,6 +23,7 @@ volatile struct Task currTask;
 
 uint32_t user_timeslice;
 int scheduler_counter;
+int task_counter;
 
 
 /*
@@ -165,39 +166,69 @@ void modeSelect()
 
 }
 
-void scheduler(int signal) {
+void cleanup_handler(int8_t field) {
+    // b0 - flagBit reset
+    // b1 - success log
+
+    if (IS_BIT_SET(field, 0)) {
+        CLR_BIT(flagBits, currTask.task_id);
+    }
+    if (IS_BIT_SET(field, 1)) {
+        printf("Task ID: %d has been logged\n", currTask.task_id);
+    }
+
+    currTask.cleanPtr();
+}
+
+void scheduler(int signal, jmp_buf* toModeSelect) {
+    // isSignalBlocked guard not required if blocking signals during system time
     // if (isSignalBlocked(signal)) {
     //     return;
     // }
 
     scheduler_counter++;
+    task_counter++;
+
     if (!(scheduler_counter % SYSTICK_DUR_M)) {
         block_signal(signal);
         
-        // int old_task_id = currTask.task_id;
+        // Store current task_id
+        int old_task_id = currTask.task_id;
         
+        // Update flags and reselect task
         systemsCheck();
         modeSelect();
 
-        //Preempt
-        
+        // If same task is selected, resume execution
+        if (old_task_id == currTask.task_id) {
+            return;
+        } else {
+            //Preempt
+            printf("Task %d preempted by %d\n", old_task_id, currTask.task_id);
+            cleanup_handler(0b00);
+
+            // Jmp using flagBits
+            siglongjmp(*toModeSelect, flagBits); // PROTOTYPE
+            // longjmp(*toModeSelect, flagBits); // SWITCH FOR FSW
+        }
+        scheduler_counter = 0;
+
         unblock_signal(signal);
     }
-    if (scheduler_counter % user_timeslice) {
-        scheduler_counter = 0;
+
+    if (task_counter % user_timeslice) {
+        block_signal(signal);
+
+        task_counter = 0;
         //kill
+        cleanup_handler(0b10);
+
+        unblock_signal(signal);
     }
 
     
     
-    
-    // void task_ISR_handler(int signal) {
-    // if(signal != SIGVTALRM) {
-    //     return;
-    // }
 
-    // // Block other signals of the same type before updating count
-    // block_signal(SIGVTALRM);
     // currentTaskInterrupts++;
     // task_handler_count++;
     // unblock_signal(SIGVTALRM);

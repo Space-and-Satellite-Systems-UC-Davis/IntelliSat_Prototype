@@ -54,8 +54,13 @@ void loadBackups()
 }
 
 void sysTick_Handler(int signal) {
+    // Backup guard from other alarms (Likely can be removed)
+    if(signal != SIGALRM) {
+        return;
+    }
+
     systick_time++;
-    scheduler(signal);
+    scheduler(signal, &toModeSelect);
 }
 
 // /*
@@ -151,12 +156,13 @@ int main()
 	
     /* Run initial mode decision */
     systemsCheck(); // All other mode decisions done via task ISR
-    
-    /* Define jmp point */
-    flagBits = sigsetjmp(toModeSelect, 1);
-
+  
     /* Start sys timer */
     setitimer(ITIMER_REAL, &sysTick_timer, NULL);
+    
+    /* Define jmp point */
+    sigsetjmp(toModeSelect, 1); // PROTOTYPE
+    // setjmp(toModeSelect); SWITCH FOR FSW
 
     /* Run superloop */
     while (1) {
@@ -171,7 +177,8 @@ int main()
         printf("Task %d is successful.\n", currTask.task_id);
 
 	    CLR_BIT(flagBits, currTask.task_id);
-        systemsCheck();
+
+        // systemsCheck(); // REMOVE??
 
         printf("sysTick_handler_count: %d\n", systick_time);
     }

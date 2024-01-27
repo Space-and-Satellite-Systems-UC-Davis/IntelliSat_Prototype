@@ -19,6 +19,7 @@ void set_user_timeslice(uint32_t t);
 
 void systemsCheck();
 void modeSelect();
-void scheduler(int signal);
+void cleanup_handler(int8_t field);
+void scheduler(int signal, jmp_buf* toModeSelect);
 
 #endif // SCHEDULER_H

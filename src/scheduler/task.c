@@ -31,31 +31,41 @@ void configEcc() {
 
 
 /* Run methods */
+
+/**
+ * usleep() makes sure that these aren't firing all the time??? 
+ */
+
 void charging() {
     // Run method for charging
     // usleep(rand());
-
+    printf("Run 'charging'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void detumble() {
     // Run method for detumble
     // usleep(rand());
+    printf("Run 'detumble'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void comms() {
     // Run method for comms
+    printf("Run 'comms'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void hdd() {
     // Run method for hdd
+    printf("Run 'hdd'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void mrw() {
     // Run method for mrw
+    printf("Run 'mrw'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void ecc() {
     // Run method for ecc
+    printf("Run 'ecc'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 
