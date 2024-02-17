@@ -1,5 +1,15 @@
+/**
+ * @file scheduler.c
+ * @brief Scheduler logic
+ *
+ * Primary scheduling logic with mode switching, 
+ * systems checking and mode selection.
+ *
+ * @authors Nithin Senthil, Parteek Singh, Jacob Tkeo
+ * @date 9/8/23
+ */
+
 #include "scheduler.h"
-#include "status.h"
 
 #define SYSTICK_DUR_M 100     // Config. of system timer in usec (100 ms)
 
@@ -14,9 +24,9 @@ const struct Task taskTable[] = {
 	{CHARGING, 50000, 10000, configCharging, charging, cleanCharging},
 	{DETUMBLE, 50000,10000, configDetumble, detumble, cleanDetumble},
 	{COMMS, 100000, 500, configComms, comms, cleanComms},
+    {ECC, 60000, 200, configEcc, ecc, cleanEcc},
     {HDD, 100000, 200, configHdd, hdd, cleanHdd},
-	{MRW, 100000, 100, configMrw, mrw, cleanMrw},
-    {ECC, 60000, 200, configEcc, ecc, cleanEcc}
+	{MRW, 100000, 100, configMrw, mrw, cleanMrw}
 };
 
 volatile struct Task currTask;
@@ -26,13 +36,17 @@ int scheduler_counter;
 int task_counter;
 
 
-/*
- * block_signal - add signals to curr. process blocked signals
- * @param signal: signal to block
+ /**
+ * @brief Signal block
+ *
+ * Blocks the specified interrupt signal by
+ * by adding it to the curr. process blocked signals
+ *
+ * @param signal Signal to block
+ * @see unblock_signal(), isSignalBlocked()
+ * @warning Make sure a corresponding unblock is in place
  */
-void block_signal(int signal)
-{
-
+void block_signal(int signal) {
     sigset_t sigmyset;
 
     // Initialize set to 0
@@ -45,13 +59,17 @@ void block_signal(int signal)
     sigprocmask(SIG_BLOCK, &sigmyset, NULL);
 }
 
-// Unblock a given signal
-/*
- * unblock_signal - remove signals from process blocked set
- * @param signal: signal to unblock
+
+  /**
+ * @brief Signal unblock
+ *
+ * Unblocks the specified interrupt signal by
+ * by removing it from the curr. process blocked signals
+ *
+ * @param signal Signal to unblock
+ * @see block_signal(), isSignalBlocked()
  */
-void unblock_signal(int signal)
-{
+void unblock_signal(int signal) {
     sigset_t sigmyset;
 
     // Initialize set to 0
@@ -64,32 +82,48 @@ void unblock_signal(int signal)
     sigprocmask(SIG_UNBLOCK, &sigmyset, NULL);
 }
 
-bool isSignalBlocked(int signal)
-{
+ /**
+ * @brief Checks if signal is blocked
+ *
+ * Checks if the specified signal is
+ * on the curr. process blocked signals
+ *
+ * @param signal Signal to check
+ * @see unblock_signal(), block_signal()
+ */
+int isSignalBlocked(int signal) {
     sigset_t sigmyset;
     sigprocmask(0, NULL, &sigmyset);
     return !sigismember(&sigmyset, signal);
-
 }
 
-/*
- * Sets the Timeslice used in order to pre-empt the running task
- * NOTE: Inputs must be a multiple of 10
- * 
- * @param    t   timeslice in ms
- * @returns none
+
+/**
+ * @brief Timeslice setter
+ *
+ * Sets the timeslice used in order to pre-empt the
+ * runnning task.
+ *
+ * @param t timeslice in ms
+ * @note Inputs must be a multiple of 10
  */
 void set_user_timeslice(uint32_t t) {
     user_timeslice = t;
 }
 
-/*
- * systemsCheck - update mode bits
- * TODO: Add in additional conditions for selecting modes
- * 	(ex. detumble needs coils to be working)
+
+/**
+ * @brief Update mode bits
+ *
+ * Checks every mode and updates mode bits
+ * if the mode needs to be scheduled in.
+ *
+ * @see scheduler()
+ * @note Implemented by relevant subteams
+ * @todo Update for combining MRW and HDD
+ *       Double check - mode peripheral requirements
  */
-void systemsCheck()
-{
+void systemsCheck() {
     statusCheck(); // CHARGING flag updated in statusCheck()
 
     if (detumbleTime()) {
@@ -134,14 +168,17 @@ void systemsCheck()
 	    CLR_BIT(flagBits, ECC);
 }
 
-/*
- * modeSelect - choose mode based on mode bits only
- * (bits 0-5 of flagBits bitfield correspond to mode bits)
+
+/**
+ * @brief Selects highest priority mode
+ *
+ * Checks all the mode bits and selects the highest
+ * priority mode that needs to run.
+ *
+ * @see scheduler()
+ * @todo Update to new idle requirements
  */
-void modeSelect()
-{
-    // Initialize currTask
-    currTask = taskTable[0]; 
+void modeSelect() {
 
     // Counters
     int new_task_id = 0;
@@ -166,6 +203,17 @@ void modeSelect()
 
 }
 
+/**
+ * @brief Handles common tasks during cleanup
+ *
+ * Uses a preference bitfield to determine which cleanup
+ * actions need to be done including logs and clearing
+ * the relevant bit from flagBits.
+ *
+ * @param field Preference field
+ * @see scheduler()
+ * @todo Update to match logging requirements
+ */
 void cleanup_handler(int8_t field) {
     // b0 - flagBit reset
     // b1 - success log
@@ -180,6 +228,17 @@ void cleanup_handler(int8_t field) {
     currTask.cleanPtr();
 }
 
+/**
+ * @brief Main scheduling logic
+ *
+ * Contains the timeslicing between system and mode time,
+ * as well as manages the kill/preemption of modes.
+ *
+ * @param signal timer signal for blocking
+ * @param toModeSelect jump buffer in case of preemption
+ * @see sysTickHandler()
+ * @todo Design check
+ */
 void scheduler(int signal, jmp_buf* toModeSelect) {
     // isSignalBlocked guard not required if blocking signals during system time
     // if (isSignalBlocked(signal)) {
@@ -209,7 +268,7 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
 
             // Jmp using flagBits
             siglongjmp(*toModeSelect, flagBits); // PROTOTYPE
-            // longjmp(*toModeSelect, flagBits); // SWITCH FOR FSW
+            // longjmp(*toModeSelect, flagBits); // SWITCH FOR HARDWARE INTEGRATION
         }
         scheduler_counter = 0;
 
@@ -225,30 +284,4 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
 
         unblock_signal(signal);
     }
-
-    
-    
-
-    // currentTaskInterrupts++;
-    // task_handler_count++;
-    // unblock_signal(SIGVTALRM);
-
-    // int old_task_id = currTask.task_id;
-
-    // // Poll Sensors
-    // systemsCheck();
-    // modeSelect();
-
-    // if (
-    //     old_task_id == currTask.task_id &&
-    //     currentTaskInterrupts < currTask.taskInterrupts
-    // ) {
-    //     return;
-    // } else {
-    //     currentTaskInterrupts = 0;
-    //     taskTable[old_task_id].cleanPtr();
-    // }
-
-    // // Jmp using flagBits
-    // siglongjmp(toModeSelect, flagBits);
 }

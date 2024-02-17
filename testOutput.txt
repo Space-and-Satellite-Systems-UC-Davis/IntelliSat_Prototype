@@ -1,0 +1,402 @@
+First startup detected
+Starting 5 second wait...start
+Running status check
+
+ID: 5
+Run 'mrw'
+Task ID: 5 has been logged
+cleanup ID: 5
+Task 5 is successful.
+systickHandlerCount: 1
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 2
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 3
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 4
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 5
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 6
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 7
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 8
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 9
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 10
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 11
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 12
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 13
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 14
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 15
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 16
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 17
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 18
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 19
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 20
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 21
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 22
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 23
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 24
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 25
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 26
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 27
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 28
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 29
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 30
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 31
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 32
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 33
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 34
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 35
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 36
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 37
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 38
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 39
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 40
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 41
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 42
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 43
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 44
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 45
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 46
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 47
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 48
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 49
+
+Idle
+ID: 0
+Run 'charging'
+Task ID: 0 has been logged
+cleanup ID: 0
+Task 0 is successful.
+systickHandlerCount: 50

@@ -1,12 +1,23 @@
+/**
+ * @file task.c
+ * @brief All task related methods
+ *
+ * Contains methods pertaining run, clean,
+ * and scheduling logic.
+ *
+ * @authors Nithin Senthil, Parteek Singh, Jacob Tkeo
+ * @date 9/8/23
+ */
+
 #include "task.h"
 
 /* Scheduling methods */
-bool batteryTime() {return !(rand() % 101);}    // tautology
-bool detumbleTime() {return !(rand() % 4);}
-bool commsTime() {return !(rand() % 4);} 
-bool hddTime() {return !(rand() % 4);}
-bool mrwTime() {return !(rand() % 4);}
-bool eccTime() {return !(rand() % 4);}
+int batteryTime() {return !(rand() % 101);}    // tautology
+int detumbleTime() {return !(rand() % 4);}
+int commsTime() {return !(rand() % 4);} 
+int hddTime() {return !(rand() % 4);}
+int mrwTime() {return !(rand() % 4);}
+int eccTime() {return !(rand() % 4);}
 
 /* Configure methods */
 void configCharging() {
@@ -31,10 +42,6 @@ void configEcc() {
 
 
 /* Run methods */
-
-/**
- * usleep() makes sure that these aren't firing all the time??? 
- */
 
 void charging() {
     // Run method for charging

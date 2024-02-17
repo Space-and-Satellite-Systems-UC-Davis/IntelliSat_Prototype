@@ -1,13 +1,9 @@
 #ifndef _TASK_H_
 #define _TASK_H_
 
-#include <stdio.h>
-#include <stdbool.h>    // scheduling functions
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
+#include "schedulerGlobals.h"
 
-#include "status.h"     // mode bits, bit manipulation macro
+#include "status.h"
 
 typedef void (*FunctionPointer)();  // For mode functions
 
@@ -25,12 +21,12 @@ struct Task {
 };
 
 /* Scheduling methods */
-bool batteryTime(); // tautology (charging is idle mode)
-bool detumbleTime();
-bool commsTime();
-bool hddTime();
-bool mrwTime();
-bool eccTime();
+int batteryTime(); // tautology (charging is idle mode)
+int detumbleTime();
+int commsTime();
+int hddTime();
+int mrwTime();
+int eccTime();
 
 /* Configure methods */
 void configCharging();
