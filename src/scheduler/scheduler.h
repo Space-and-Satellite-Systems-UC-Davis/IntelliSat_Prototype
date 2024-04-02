@@ -6,10 +6,10 @@
 #include "task.h"
 #include "status.h"
 
-extern volatile struct Task currTask;  // volatile: don't cache global var.
+// extern volatile struct Task currTask;  // volatile: don't cache global var.
 
-/* Task table */
-extern const struct Task taskTable[];
+// /* Task table */
+// extern struct Task taskTable[6];
 
 void block_signal(int signal);
 void unblock_signal(int signal);
@@ -20,5 +20,6 @@ void systemsCheck();
 void modeSelect();
 void cleanup_handler(int8_t field);
 void scheduler(int signal, jmp_buf* toModeSelect);
+
 
 #endif // SCHEDULER_H

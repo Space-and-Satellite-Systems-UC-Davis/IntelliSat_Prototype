@@ -20,13 +20,13 @@
 
 // TODO: update ECC mode based on discussions with ELEC
 // RS - system, Hamming codes on Idle
-const struct Task taskTable[] = {
-	{CHARGING, 50000, 10000, configCharging, charging, cleanCharging},
-	{DETUMBLE, 50000,10000, configDetumble, detumble, cleanDetumble},
-	{COMMS, 100000, 500, configComms, comms, cleanComms},
-    {ECC, 60000, 200, configEcc, ecc, cleanEcc},
-    {HDD, 100000, 200, configHdd, hdd, cleanHdd},
-	{MRW, 100000, 100, configMrw, mrw, cleanMrw}
+struct Task taskTable[] = {
+	{LOWPWR, 10000, configLowPwr, lowPwr, cleanLowPwr, 0},                  // Func1 - N/A
+	{DETUMBLE,10000, configDetumble, detumble, cleanDetumble, 0},           // Func1 - N/A
+	{COMMS, 500, configComms, comms, cleanComms, 0},                        // Func1 - N/A
+    {ECC, 200, configEcc, ecc, cleanEcc, 0},                                // Func1 - N/A
+    {EXPERIMENT, 200, configExperiment, experiment, cleanExperiment, 0},    // Func1 - Experiment ID (0 for none)
+    {IDLE, 200, configIdle, idle, cleanIdle, 0}                             // Func1 - N/A
 };
 
 volatile struct Task currTask;
@@ -126,46 +126,43 @@ void set_user_timeslice(uint32_t t) {
 void systemsCheck() {
     statusCheck(); // CHARGING flag updated in statusCheck()
 
+    if (lowPwrTime()) {
+        SET_BIT(flagBits.modeBits, LOWPWR);
+    } else {
+        CLR_BIT(flagBits.modeBits, LOWPWR);
+    }
+
     if (detumbleTime()) {
-        if (IS_BIT_SET(flagBits, COILS)) 
-                SET_BIT(flagBits, DETUMBLE);
+        if (IS_BIT_SET(flagBits.statusBits, COILS)) 
+                SET_BIT(flagBits.modeBits, DETUMBLE);
         else
             printf("Coils circuit is not communicating");
     } else {
-	    CLR_BIT(flagBits, DETUMBLE);
+	    CLR_BIT(flagBits.modeBits, DETUMBLE);
     }
 
     if (commsTime()) {
-        if (IS_BIT_SET(flagBits, ANTENNA))
-            SET_BIT(flagBits, COMMS);
+        if (IS_BIT_SET(flagBits.statusBits, ANTENNA))
+            SET_BIT(flagBits.modeBits, COMMS);
         else
             printf("Antenna is not deployed\n");
     } else {
-        CLR_BIT(flagBits, COMMS);
+        CLR_BIT(flagBits.modeBits, COMMS);
     }
 
-    if (hddTime()) {
-        if (IS_BIT_SET(flagBits, HDD_STATUS))
-            SET_BIT(flagBits, HDD);
-        else
-            printf("The HDD ESC is not communicating\n");
+    int newExpID = experimentTime();
+    if (newExpID) {
+        SET_BIT(flagBits.modeBits, EXPERIMENT);
+        taskTable[4].func1 = newExpID;
     } else {
-	    CLR_BIT(flagBits, HDD);
-    }
-
-    if (mrwTime()) {
-        if (IS_BIT_SET(flagBits, MRW_STATUS))
-            SET_BIT(flagBits, MRW);
-        else
-            printf("The MRW ESC is not communicating\n");
-    } else {
-	    CLR_BIT(flagBits, MRW);
+	    CLR_BIT(flagBits.modeBits, EXPERIMENT);
+        taskTable[4].func1 = 0;
     }
 
     if (eccTime())
-        SET_BIT(flagBits, ECC);
+        SET_BIT(flagBits.modeBits, ECC);
     else
-	    CLR_BIT(flagBits, ECC);
+	    CLR_BIT(flagBits.modeBits, ECC);
 }
 
 
@@ -185,17 +182,17 @@ void modeSelect() {
     int i;
 
     // Determine which mode to run next
-    for (i = 0; i < 6; i++) {
-        if (IS_BIT_SET(flagBits, i)) {
+    for (i = 0; i < 5; i++) {
+        if (IS_BIT_SET(flagBits.modeBits, i)) {
             new_task_id = i;
             break;
         }
     }
 
     // Idle mode = CHARGING
-    if (i == 6) {
+    if (i == 5) {
         printf("Idle\n");
-        new_task_id = 0;
+        new_task_id = 5;
     }
     
     // Select task to run from taskTable 
@@ -219,10 +216,10 @@ void cleanup_handler(int8_t field) {
     // b1 - success log
 
     if (IS_BIT_SET(field, 0)) {
-        CLR_BIT(flagBits, currTask.task_id);
+        CLR_BIT(flagBits.modeBits, currTask.task_id);
     }
     if (IS_BIT_SET(field, 1)) {
-        printf("Task ID: %d has been logged\n", currTask.task_id);
+        // printf("Task ID: %d has been logged\n", currTask.task_id);
     }
 
     currTask.cleanPtr();
@@ -237,7 +234,7 @@ void cleanup_handler(int8_t field) {
  * @param signal timer signal for blocking
  * @param toModeSelect jump buffer in case of preemption
  * @see sysTickHandler()
- * @todo Design check
+ * @todo Design check, hardware integration switch jumps
  */
 void scheduler(int signal, jmp_buf* toModeSelect) {
     // isSignalBlocked guard not required if blocking signals during system time
@@ -267,7 +264,7 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
             cleanup_handler(0b00);
 
             // Jmp using flagBits
-            siglongjmp(*toModeSelect, flagBits); // PROTOTYPE
+            siglongjmp(*toModeSelect, 1); // PROTOTYPE
             // longjmp(*toModeSelect, flagBits); // SWITCH FOR HARDWARE INTEGRATION
         }
         scheduler_counter = 0;

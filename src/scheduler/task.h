@@ -2,6 +2,7 @@
 #define _TASK_H_
 
 #include "schedulerGlobals.h"
+// #include "./../integration/integration.h"
 
 #include "status.h"
 
@@ -12,45 +13,46 @@ typedef void (*FunctionPointer)();  // For mode functions
  * (note: uses preemption to interrupt running tasks)
  */
 struct Task {
-    uint8_t task_id;           // PRIMARY_KEY
-    uint32_t timerDuration;     // in microseconds
+    uint8_t task_id;            // PRIMARY_KEY
     uint16_t taskInterrupts;    // times taskISR called, cancel mode/task after x reached
     FunctionPointer configPtr;  // configure timers, other mode info.
     FunctionPointer runPtr;     // the main func. for mode, via ADCS
     FunctionPointer cleanPtr;   // reset timers, clear temp buffers, etc
+    uint8_t func1;              // Open functionality
 };
 
+extern volatile struct Task currTask;
+extern struct Task taskTable[6];
+
 /* Scheduling methods */
-int batteryTime(); // tautology (charging is idle mode)
-int detumbleTime();
-int commsTime();
-int hddTime();
-int mrwTime();
-int eccTime();
+bool lowPwrTime(); // tautology (charging is idle mode)
+bool detumbleTime();
+bool commsTime();
+int experimentTime();
+bool eccTime();
 
 /* Configure methods */
-void configCharging();
+void configLowPwr();
 void configDetumble();
 void configComms();
-void configHdd();
-void configMrw();
+void configExperiment();
 void configEcc();
+void configIdle();
 
 /* Run methods */
-void charging();
+void lowPwr();
 void detumble();
 void comms();
-void hdd();
-void mrw();
+void experiment();
 void ecc();
+void idle();
 
 /* Clean methods */
-void cleanCharging();
+void cleanLowPwr();
 void cleanDetumble();
 void cleanComms();
-void cleanHdd();
-void cleanMrw();
+void cleanExperiment();
 void cleanEcc();
-
+void cleanIdle();
 
 #endif

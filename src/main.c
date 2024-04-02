@@ -19,12 +19,13 @@
 #include "scheduler/status.h"
 
 /* Macros */
-#define SYSTICK_DUR_U 1000          // Config. of systick timer in usec (1 ms)
+#define SYSTICK_DUR_U 10000          // Config. of systick timer in usec (1 ms)
 #define BATTERY_THRESHOLD 20        // TODO: Min. battery voltage value, below which mode -> CHARGING
 
 /* Misc variables */
 int reboot_count;
-volatile uint16_t flagBits = 0;     // Declared in status.h
+// volatile uint16_t flagBits = 0;     // Declared in status.h
+volatile struct OperationBits flagBits = {0,0};
 jmp_buf to_mode_select;
 
 /* Testing Variables */
@@ -52,11 +53,11 @@ void sysTickHandler(int signal);
 void startup() {
     // TODO: Retrieve base info from flash (flagBits, reboot_count, etc.)
     reboot_count++;
-    if (!IS_BIT_SET(flagBits, START)) {
+    if (!IS_BIT_SET(flagBits.statusBits, START)) {
         printf("First startup detected\nStarting 5 second wait...");
         usleep(5000000); // TODO: replace with correct wait period (30min)
 
-        SET_BIT(flagBits, START); // TODO: Intentionally at the end in case of failure during wait state (REVISIT)
+        SET_BIT(flagBits.statusBits, START); // TODO: Intentionally at the end in case of failure during wait state (REVISIT)
 
     } else {
         printf("Loading Backups\nPlease wait (5s)...\n");
@@ -109,7 +110,7 @@ void virtualTesting(int argc, char *argv[]) {
     
     if (argc >= 3) {
         if (atoi(argv[2]) == 1) {
-            SET_BIT(flagBits, START);
+            SET_BIT(flagBits.statusBits, START);
         }
     }
     systick_handler_count = max_handler_count;
@@ -168,7 +169,7 @@ int main(int argc, char *argv[]) {
     	printf("ID: %d\n", currTask.task_id);
 
         currTask.runPtr();  // usleep(rand) done here
-	    CLR_BIT(flagBits, currTask.task_id);
+	    CLR_BIT(flagBits.modeBits, currTask.task_id);
 
         printf("Task %d is successful.\n", currTask.task_id);
 

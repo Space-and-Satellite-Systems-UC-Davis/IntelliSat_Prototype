@@ -12,17 +12,36 @@
 #include "task.h"
 
 /* Scheduling methods */
-int batteryTime() {return !(rand() % 101);}    // tautology
-int detumbleTime() {return !(rand() % 4);}
-int commsTime() {return !(rand() % 4);} 
-int hddTime() {return !(rand() % 4);}
-int mrwTime() {return !(rand() % 4);}
-int eccTime() {return !(rand() % 4);}
+bool lowPwrTime() {
+    // return !(rand() % 101);
+    return 0;
+}    // tautology
+bool detumbleTime() {
+    // return !(rand() % 4);
+    return 1;
+}
+bool commsTime() {
+    // return !(rand() % 4);
+    return 1;
+}
+
+// adcs_mode ADCS_recommend_mode() {
+//     return ADCS_DETUMBLE;
+// }
+int experimentTime() {
+    // return !(rand() % 4);
+    return ADCS_recommend_mode();
+    // return 0;
+}
+bool eccTime() {
+    // return !(rand() % 4);
+    return 0;
+}
 
 /* Configure methods */
-void configCharging() {
+void configLowPwr() {
     // Configure method for charging
-    printf("Configure Charging is running\n");
+    printf("Configure Low Power is running\n");
 }
 void configDetumble() {
     // Configure method for detumble
@@ -30,20 +49,19 @@ void configDetumble() {
 void configComms() {
     // Configure method for comms
 }
-void configHdd() {
-    // Configure method for hdd
-}
-void configMrw() {
-    // Configure method for mrw
+void configExperiment() {
+    // Configure method for experiment
 }
 void configEcc() {
     // Configure method for ecc
+}
+void configIdle() {
 }
 
 
 /* Run methods */
 
-void charging() {
+void lowPwr() {
     // Run method for charging
     // usleep(rand());
     printf("Run 'charging'\n");
@@ -60,14 +78,11 @@ void comms() {
     printf("Run 'comms'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
-void hdd() {
-    // Run method for hdd
-    printf("Run 'hdd'\n");
-    usleep( ((rand() % 11) * 100000) + 10000 );
-}
-void mrw() {
-    // Run method for mrw
-    printf("Run 'mrw'\n");
+void experiment() {
+    // Run method for experiment
+    printf("Run 'experiment'\n");
+    ADCS_MAIN(taskTable[4].func1);
+
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void ecc() {
@@ -75,12 +90,16 @@ void ecc() {
     printf("Run 'ecc'\n");
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
+void idle() {
+    printf("Run Idle\n");
+    while(1);
+}
 
 
 /* Clean methods */
-void cleanCharging() {
+void cleanLowPwr() {
     // Clean method for charging
-    printf("cleanup ID: %d\n", CHARGING);
+    printf("cleanup ID: %d\n", LOWPWR);
 }
 void cleanDetumble() {
     // Clean method for detumble
@@ -90,15 +109,13 @@ void cleanComms() {
     // Clean method for comms
     printf("cleanup ID: %d\n", COMMS);
 }
-void cleanHdd() {
-    // Clean method for hdd
-    printf("cleanup ID: %d\n", HDD);
-}
-void cleanMrw() {
-    // Clean method for mrw
-    printf("cleanup ID: %d\n", MRW);
+void cleanExperiment() {
+    // Clean method for experiment
+    printf("cleanup ID: %d\n", EXPERIMENT);
 }
 void cleanEcc() {
     // Clean method for ecc
     printf("cleanup ID: %d\n", ECC);
+}
+void cleanIdle() {
 }

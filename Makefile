@@ -2,23 +2,27 @@ CC 	= gcc
 CFLAGS 	= -g -Wall -Wextra 
 OBJLOC = temp
 SRCLOC = src
+INTLOC = src/integration
 
 all:	StarCoreKernel
 
-$(OBJLOC)/main.o:	src/main.c src/scheduler/task.h src/scheduler/status.h src/scheduler/scheduler.h
-	$(CC) -c $(CFLAGS) $(SRCLOC)/main.c -o $(OBJLOC)/main.o
-
-$(OBJLOC)/task.o:	src/scheduler/task.c src/scheduler/task.h src/scheduler/status.h
+$(OBJLOC)/task.o:	$(SRCLOC)/scheduler/task.c $(SRCLOC)/scheduler/task.h $(SRCLOC)/scheduler/status.h
 	$(CC) -c $(CFLAGS) $(SRCLOC)/scheduler/task.c -o $(OBJLOC)/task.o
 
-$(OBJLOC)/scheduler.o: src/scheduler/scheduler.c src/scheduler/status.h src/scheduler/task.h
+$(OBJLOC)/scheduler.o: $(SRCLOC)/scheduler/scheduler.c $(SRCLOC)/scheduler/status.h $(SRCLOC)/scheduler/task.h
 	$(CC) -c $(CFLAGS) $(SRCLOC)/scheduler/scheduler.c -o $(OBJLOC)/scheduler.o
 
-$(OBJLOC)/status.o: src/scheduler/status.c src/scheduler/status.h
+$(OBJLOC)/status.o: $(SRCLOC)/scheduler/status.c $(SRCLOC)/scheduler/status.h
 	$(CC) -c $(CFLAGS) $(SRCLOC)/scheduler/status.c -o $(OBJLOC)/status.o
 
-StarCoreKernel:	$(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o
-	$(CC) $(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o -o StarCoreKernel 
+$(OBJLOC)/main.o:	$(SRCLOC)/main.c $(SRCLOC)/scheduler/task.h $(SRCLOC)/scheduler/status.h $(SRCLOC)/scheduler/scheduler.h
+	$(CC) -c $(CFLAGS) $(SRCLOC)/main.c -o $(OBJLOC)/main.o
+
+$(OBJLOC)/ADCS.o:	$(INTLOC)/ADCS.c $(INTLOC)/ADCS.h $(INTLOC)/virtual_intellisat.h $(INTLOC)/adcs_math/matrix.h $(INTLOC)/adcs_math/vector.h
+	$(CC) -c $(CFLAGS) $(INTLOC)/ADCS.c -o $(OBJLOC)/ADCS.o
+
+StarCoreKernel:	$(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o $(OBJLOC)/ADCS.o
+	$(CC) $(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o $(OBJLOC)/ADCS.o -o StarCoreKernel
 
 flushTemp:
 	rm -fv $(OBJLOC)/*.o $(OBJLOC)/*~ 
