@@ -212,8 +212,8 @@ void modeSelect() {
  * @todo Update to match logging requirements
  */
 void cleanup_handler(int8_t field) {
-    // b0 - flagBit reset
-    // b1 - success log
+    // b1 - flagBit reset
+    // b0 - success log
 
     if (IS_BIT_SET(field, 0)) {
         CLR_BIT(flagBits.modeBits, currTask.task_id);
