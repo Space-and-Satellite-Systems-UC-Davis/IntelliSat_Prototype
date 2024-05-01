@@ -9,4 +9,8 @@
     #include "adcs_math/matrix.h"
     #include "adcs_math/vector.h"
 
+    #include "intellisat/print_scan.h"
+    #include "intellisat/led.h"
+    #include "intellisat/buttons.h"
+
 #endif

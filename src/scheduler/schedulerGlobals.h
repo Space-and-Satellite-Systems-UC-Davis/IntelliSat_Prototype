@@ -2,6 +2,10 @@
 #ifndef SCHEDULER_GLOBALS_H
 #define SCHEDULER_GLOBALS_H
 
+#ifdef VIRTUAL
+#define printMsg printf
+#endif
+
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -11,5 +15,7 @@
 #include <stdbool.h>
 
 #include "./../integration/integration.h"
+
+#define KERNEL_VERSION 0
 
 #endif
