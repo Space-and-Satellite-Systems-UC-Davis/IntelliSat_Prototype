@@ -22,7 +22,7 @@
  * @todo Separate into wrapper functions for implementation
  */
 void statusCheck() {
-    printf("Running status check\n");
+    //printMsg("Running status check\n");
     // Sets all status flags for testing (ASSUMES ALL SYSTEMS FUNCTIONAL)
     for(int i = 0; i < 5; i++) {
         SET_BIT(flagBits.statusBits, i);

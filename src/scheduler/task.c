@@ -11,18 +11,51 @@
 
 #include "task.h"
 
+
+#if KERNEL_VERSION == 1
+
 /* Scheduling methods */
 bool lowPwrTime() {
     // return !(rand() % 101);
-    return 0;
+    return false;
 }    // tautology
 bool detumbleTime() {
     // return !(rand() % 4);
-    return 1;
+    return false;
 }
 bool commsTime() {
     // return !(rand() % 4);
-    return 1;
+    return false;
+}
+
+// adcs_mode ADCS_recommend_mode() {
+//     return ADCS_DETUMBLE;
+// }
+int experimentTime() {
+    // return !(rand() % 4);
+    return ADCS_recommend_mode();
+    // return 0;
+}
+
+bool eccTime() {
+    // return !(rand() % 4);
+    return false;
+}
+
+#else
+
+/* Scheduling methods */
+bool lowPwrTime() {
+    // return !(rand() % 101);
+    return false;
+}
+bool detumbleTime() {
+    // return !(rand() % 4);
+    return true;
+}
+bool commsTime() {
+    // return !(rand() % 4);
+    return true;
 }
 
 // adcs_mode ADCS_recommend_mode() {
@@ -35,13 +68,15 @@ int experimentTime() {
 }
 bool eccTime() {
     // return !(rand() % 4);
-    return 0;
+    return false;
 }
+#endif
+
 
 /* Configure methods */
 void configLowPwr() {
     // Configure method for charging
-    printf("Configure Low Power is running\n");
+    // printMsg("Configure Low Power is running\n");
 }
 void configDetumble() {
     // Configure method for detumble
@@ -64,34 +99,46 @@ void configIdle() {
 void lowPwr() {
     // Run method for charging
     // usleep(rand());
-    printf("Run 'charging'\n");
+    // printMsg("Run 'charging'\n");
+
+    led_dx(0, 1);
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
-void detumble() {
     // Run method for detumble
+void detumble() {
     // usleep(rand());
-    printf("Run 'detumble'\n");
+    // printMsg("Run 'detumble'\n");
+
+    led_dx(1, 1);
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void comms() {
     // Run method for comms
-    printf("Run 'comms'\n");
+    // printMsg("Run 'comms'\n");
+
+    led_dx(2, 1);
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void experiment() {
     // Run method for experiment
-    printf("Run 'experiment'\n");
+    // printMsg("Run 'experiment'\n");
+
+    led_dx(3, 1);
     ADCS_MAIN(taskTable[4].func1);
 
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void ecc() {
     // Run method for ecc
-    printf("Run 'ecc'\n");
+    // printMsg("Run 'ecc'\n");
+
+    led_a(1);
     usleep( ((rand() % 11) * 100000) + 10000 );
 }
 void idle() {
-    printf("Run Idle\n");
+    // printMsg("Run Idle\n");
+
+    led_b(1);
     while(1);
 }
 
@@ -99,23 +146,34 @@ void idle() {
 /* Clean methods */
 void cleanLowPwr() {
     // Clean method for charging
-    printf("cleanup ID: %d\n", LOWPWR);
+    // printMsg("cleanup ID: %d\n", LOWPWR);
+
+    led_dx(0, 0);
 }
 void cleanDetumble() {
     // Clean method for detumble
-    printf("cleanup ID: %d\n", DETUMBLE);
+    // printMsg("cleanup ID: %d\n", DETUMBLE);
+
+    led_dx(1, 0);
 }
 void cleanComms() {
     // Clean method for comms
-    printf("cleanup ID: %d\n", COMMS);
+    // printMsg("cleanup ID: %d\n", COMMS);
+
+    led_dx(2, 0);
 }
 void cleanExperiment() {
     // Clean method for experiment
-    printf("cleanup ID: %d\n", EXPERIMENT);
+    // printMsg("cleanup ID: %d\n", EXPERIMENT);
+
+    led_dx(3, 0);
 }
 void cleanEcc() {
     // Clean method for ecc
-    printf("cleanup ID: %d\n", ECC);
+    // printMsg("cleanup ID: %d\n", ECC);
+
+    led_a(0);
 }
 void cleanIdle() {
+    led_b(0);
 }

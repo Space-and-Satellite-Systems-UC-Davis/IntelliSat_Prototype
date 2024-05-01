@@ -133,19 +133,21 @@ void systemsCheck() {
     }
 
     if (detumbleTime()) {
-        if (IS_BIT_SET(flagBits.statusBits, COILS)) 
+        if (IS_BIT_SET(flagBits.statusBits, COILS)) {
                 SET_BIT(flagBits.modeBits, DETUMBLE);
-        else
-            printf("Coils circuit is not communicating");
+        } else {
+            // printMsg("Coils circuit is not communicating");
+        }
     } else {
 	    CLR_BIT(flagBits.modeBits, DETUMBLE);
     }
 
     if (commsTime()) {
-        if (IS_BIT_SET(flagBits.statusBits, ANTENNA))
+        if (IS_BIT_SET(flagBits.statusBits, ANTENNA)) {
             SET_BIT(flagBits.modeBits, COMMS);
-        else
-            printf("Antenna is not deployed\n");
+        } else {
+            // printMsg("Antenna is not deployed\n");
+        }
     } else {
         CLR_BIT(flagBits.modeBits, COMMS);
     }
@@ -163,6 +165,7 @@ void systemsCheck() {
         SET_BIT(flagBits.modeBits, ECC);
     else
 	    CLR_BIT(flagBits.modeBits, ECC);
+    
 }
 
 
@@ -191,7 +194,7 @@ void modeSelect() {
 
     // Idle mode = CHARGING
     if (i == 5) {
-        printf("Idle\n");
+        // printMsg("Idle\n");
         new_task_id = 5;
     }
     
@@ -219,7 +222,7 @@ void cleanup_handler(int8_t field) {
         CLR_BIT(flagBits.modeBits, currTask.task_id);
     }
     if (IS_BIT_SET(field, 1)) {
-        // printf("Task ID: %d has been logged\n", currTask.task_id);
+        // printMsg("Task ID: %d has been logged\n", currTask.task_id);
     }
 
     currTask.cleanPtr();
@@ -260,10 +263,11 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
             return;
         } else {
             //Preempt
-            printf("Task %d preempted by %d\n", old_task_id, currTask.task_id);
+            //printMsg("Task %d preempted by %d\n", old_task_id, currTask.task_id);
             cleanup_handler(0b00);
 
             // Jmp using flagBits
+            unblock_signal(signal);
             siglongjmp(*toModeSelect, 1); // PROTOTYPE
             // longjmp(*toModeSelect, flagBits); // SWITCH FOR HARDWARE INTEGRATION
         }

@@ -54,13 +54,13 @@ void startup() {
     // TODO: Retrieve base info from flash (flagBits, reboot_count, etc.)
     reboot_count++;
     if (!IS_BIT_SET(flagBits.statusBits, START)) {
-        printf("First startup detected\nStarting 5 second wait...");
+        //printMsg("First startup detected\nStarting 5 second wait...\n");
         usleep(5000000); // TODO: replace with correct wait period (30min)
 
         SET_BIT(flagBits.statusBits, START); // TODO: Intentionally at the end in case of failure during wait state (REVISIT)
 
     } else {
-        printf("Loading Backups\nPlease wait (5s)...\n");
+        //printMsg("Loading Backups\nPlease wait (5s)...\n");
         usleep(5000000); // TESTING: remove when backups implemented
         // TODO: Load backups here
     }
@@ -114,7 +114,7 @@ void virtualTesting(int argc, char *argv[]) {
         }
     }
     systick_handler_count = max_handler_count;
-    printf("Inputted handler count: %d\n", max_handler_count);
+    //printMsg("Inputted handler count: %d\n", max_handler_count);
 
 
     /* System handler, timer setup */
@@ -127,6 +127,7 @@ void virtualTesting(int argc, char *argv[]) {
     sysTick_timer.it_value.tv_usec = SYSTICK_DUR_U;
     sysTick_timer.it_interval.tv_sec = 0;
     sysTick_timer.it_interval.tv_usec = SYSTICK_DUR_U;
+
 }
 
 
@@ -139,45 +140,50 @@ void virtualTesting(int argc, char *argv[]) {
  */
 int main(int argc, char *argv[]) {
 
-    //  Virtual Intellisat configuration
-    virtualTesting(argc, argv);
-
+    #ifdef VIRTUAL
     // Initial configuration
     startup();
 
+    //  Virtual Intellisat configuration
+    virtualTesting(argc, argv);
+    
     /* Set up rand function for testing */
 	srand(2);
-	printf("start\n");
-	
+    #endif
+	printMsg("start\n");
+
     /* Run initial mode decision */
     systemsCheck(); // All other mode decisions done via task ISR
     currTask = taskTable[0];
-  
-    /* Start sys timer */
-    setitimer(ITIMER_REAL, &sysTick_timer, NULL);
     
+    #ifdef VIRTUAL
     /* Define jmp point */
     sigsetjmp(to_mode_select, 1); // PROTOTYPE
-    // setjmp(toModeSelect); SWITCH FOR Hardware Intellisat
+    /* Start sys timer */
+    setitimer(ITIMER_REAL, &sysTick_timer, NULL);
+    #else
+    setjmp(toModeSelect); // SWITCH FOR Hardware Intellisat
+    //TODO: Start hardware timer
+    #endif
 
     /* Run superloop */
     while (1) {
-        printf("\n");
+        //printMsg("\n");
 
         modeSelect();
 
-    	printf("ID: %d\n", currTask.task_id);
+    	//printMsg("ID: %d\n", currTask.task_id);
 
         currTask.runPtr();  // usleep(rand) done here
 	    CLR_BIT(flagBits.modeBits, currTask.task_id);
 
-        printf("Task %d is successful.\n", currTask.task_id);
+        //printMsg("Task %d is successful.\n", currTask.task_id);
 
         
         // Cycle limiter for testing
-        printf("systickHandlerCount: %d\n", max_handler_count - systick_handler_count);
+        //printMsg("systickHandlerCount: %d\n", max_handler_count - systick_handler_count);
         if (!is_unlimited_tick && systick_handler_count <= 0) {
-            printf("Terminating Kernel\n");
+            printMsg("Terminating Kernel\n");
             return 0;
         }
     }

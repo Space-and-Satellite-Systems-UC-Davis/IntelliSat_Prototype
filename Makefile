@@ -1,5 +1,5 @@
 CC 	= gcc
-CFLAGS 	= -g -Wall -Wextra 
+CFLAGS 	= -g -Wall -Wextra -DVIRTUAL
 OBJLOC = temp
 SRCLOC = src
 INTLOC = src/integration
@@ -21,7 +21,7 @@ $(OBJLOC)/main.o:	$(SRCLOC)/main.c $(SRCLOC)/scheduler/task.h $(SRCLOC)/schedule
 $(OBJLOC)/ADCS.o:	$(INTLOC)/ADCS.c $(INTLOC)/ADCS.h $(INTLOC)/virtual_intellisat.h $(INTLOC)/adcs_math/matrix.h $(INTLOC)/adcs_math/vector.h
 	$(CC) -c $(CFLAGS) $(INTLOC)/ADCS.c -o $(OBJLOC)/ADCS.o
 
-StarCoreKernel:	$(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o $(OBJLOC)/ADCS.o
+StarCoreKernel:	$(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o $(OBJLOC)/ADCS.o $(SRCLOC)/scheduler/schedulerGlobals.h
 	$(CC) $(OBJLOC)/main.o $(OBJLOC)/task.o $(OBJLOC)/scheduler.o $(OBJLOC)/status.o $(OBJLOC)/ADCS.o -o StarCoreKernel
 
 flushTemp:
