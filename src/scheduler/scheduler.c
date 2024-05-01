@@ -2,7 +2,7 @@
  * @file scheduler.c
  * @brief Scheduler logic
  *
- * Primary scheduling logic with mode switching, 
+ * Primary scheduling logic with mode switching,
  * systems checking and mode selection.
  *
  * @authors Nithin Senthil, Parteek Singh, Jacob Tkeo
@@ -11,7 +11,11 @@
 
 #include "scheduler.h"
 
-#define SYSTICK_DUR_M 100     // Config. of system timer in usec (100 ms)
+#define SYSTICK_DUR_M 100 // Config. of system timer in usec (100 ms)
+
+// Used to define testing blocks
+// See test_block_signal
+#define TESTING
 
 /*
  * taskTable - info. about all modes on satellite
@@ -21,12 +25,14 @@
 // TODO: update ECC mode based on discussions with ELEC
 // RS - system, Hamming codes on Idle
 struct Task taskTable[] = {
-	{LOWPWR, 10000, configLowPwr, lowPwr, cleanLowPwr, 0},                  // Func1 - N/A
-	{DETUMBLE,10000, configDetumble, detumble, cleanDetumble, 0},           // Func1 - N/A
-	{COMMS, 500, configComms, comms, cleanComms, 0},                        // Func1 - N/A
-    {ECC, 200, configEcc, ecc, cleanEcc, 0},                                // Func1 - N/A
-    {EXPERIMENT, 200, configExperiment, experiment, cleanExperiment, 0},    // Func1 - Experiment ID (0 for none)
-    {IDLE, 200, configIdle, idle, cleanIdle, 0}                             // Func1 - N/A
+    {LOWPWR, 10000, configLowPwr, lowPwr, cleanLowPwr, 0}, // Func1 - N/A
+    {DETUMBLE, 10000, configDetumble, detumble, cleanDetumble,
+     0},                                             // Func1 - N/A
+    {COMMS, 500, configComms, comms, cleanComms, 0}, // Func1 - N/A
+    {ECC, 200, configEcc, ecc, cleanEcc, 0},         // Func1 - N/A
+    {EXPERIMENT, 200, configExperiment, experiment, cleanExperiment,
+     0}, // Func1 - Experiment ID (0 for none)
+    {IDLE, 200, configIdle, idle, cleanIdle, 0} // Func1 - N/A
 };
 
 volatile struct Task currTask;
@@ -35,8 +41,7 @@ uint32_t user_timeslice;
 int scheduler_counter;
 int task_counter;
 
-
- /**
+/**
  * @brief Signal block
  *
  * Blocks the specified interrupt signal by
@@ -59,8 +64,7 @@ void block_signal(int signal) {
     sigprocmask(SIG_BLOCK, &sigmyset, NULL);
 }
 
-
-  /**
+/**
  * @brief Signal unblock
  *
  * Unblocks the specified interrupt signal by
@@ -82,7 +86,7 @@ void unblock_signal(int signal) {
     sigprocmask(SIG_UNBLOCK, &sigmyset, NULL);
 }
 
- /**
+/**
  * @brief Checks if signal is blocked
  *
  * Checks if the specified signal is
@@ -97,7 +101,6 @@ int isSignalBlocked(int signal) {
     return !sigismember(&sigmyset, signal);
 }
 
-
 /**
  * @brief Timeslice setter
  *
@@ -107,10 +110,7 @@ int isSignalBlocked(int signal) {
  * @param t timeslice in ms
  * @note Inputs must be a multiple of 10
  */
-void set_user_timeslice(uint32_t t) {
-    user_timeslice = t;
-}
-
+void set_user_timeslice(uint32_t t) { user_timeslice = t; }
 
 /**
  * @brief Update mode bits
@@ -133,19 +133,21 @@ void systemsCheck() {
     }
 
     if (detumbleTime()) {
-        if (IS_BIT_SET(flagBits.statusBits, COILS)) 
-                SET_BIT(flagBits.modeBits, DETUMBLE);
-        else
+        if (IS_BIT_SET(flagBits.statusBits, COILS)) {
+            SET_BIT(flagBits.modeBits, DETUMBLE);
+        } else {
             printf("Coils circuit is not communicating");
+        }
     } else {
-	    CLR_BIT(flagBits.modeBits, DETUMBLE);
+        CLR_BIT(flagBits.modeBits, DETUMBLE);
     }
 
     if (commsTime()) {
-        if (IS_BIT_SET(flagBits.statusBits, ANTENNA))
+        if (IS_BIT_SET(flagBits.statusBits, ANTENNA)) {
             SET_BIT(flagBits.modeBits, COMMS);
-        else
+        } else {
             printf("Antenna is not deployed\n");
+        }
     } else {
         CLR_BIT(flagBits.modeBits, COMMS);
     }
@@ -155,16 +157,16 @@ void systemsCheck() {
         SET_BIT(flagBits.modeBits, EXPERIMENT);
         taskTable[4].func1 = newExpID;
     } else {
-	    CLR_BIT(flagBits.modeBits, EXPERIMENT);
+        CLR_BIT(flagBits.modeBits, EXPERIMENT);
         taskTable[4].func1 = 0;
     }
 
-    if (eccTime())
+    if (eccTime()) {
         SET_BIT(flagBits.modeBits, ECC);
-    else
-	    CLR_BIT(flagBits.modeBits, ECC);
+    } else {
+        CLR_BIT(flagBits.modeBits, ECC);
+    }
 }
-
 
 /**
  * @brief Selects highest priority mode
@@ -194,10 +196,9 @@ void modeSelect() {
         printf("Idle\n");
         new_task_id = 5;
     }
-    
-    // Select task to run from taskTable 
-    currTask = taskTable[new_task_id];
 
+    // Select task to run from taskTable
+    currTask = taskTable[new_task_id];
 }
 
 /**
@@ -236,7 +237,7 @@ void cleanup_handler(int8_t field) {
  * @see sysTickHandler()
  * @todo Design check, hardware integration switch jumps
  */
-void scheduler(int signal, jmp_buf* toModeSelect) {
+void scheduler(int signal, jmp_buf *toModeSelect) {
     // isSignalBlocked guard not required if blocking signals during system time
     // if (isSignalBlocked(signal)) {
     //     return;
@@ -247,10 +248,10 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
 
     if (!(scheduler_counter % SYSTICK_DUR_M)) {
         block_signal(signal);
-        
+
         // Store current task_id
         int old_task_id = currTask.task_id;
-        
+
         // Update flags and reselect task
         systemsCheck();
         modeSelect();
@@ -259,13 +260,14 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
         if (old_task_id == currTask.task_id) {
             return;
         } else {
-            //Preempt
+            // Preempt
             printf("Task %d preempted by %d\n", old_task_id, currTask.task_id);
             cleanup_handler(0b00);
 
             // Jmp using flagBits
             siglongjmp(*toModeSelect, 1); // PROTOTYPE
-            // longjmp(*toModeSelect, flagBits); // SWITCH FOR HARDWARE INTEGRATION
+            // longjmp(*toModeSelect, flagBits); // SWITCH FOR HARDWARE
+            // INTEGRATION
         }
         scheduler_counter = 0;
 
@@ -276,9 +278,39 @@ void scheduler(int signal, jmp_buf* toModeSelect) {
         block_signal(signal);
 
         task_counter = 0;
-        //kill
+        // kill
         cleanup_handler(0b10);
 
         unblock_signal(signal);
     }
 }
+
+#ifdef TESTING
+int test_block_signal() {
+    int passed = 1;
+
+    block_signal(0);
+    // This signal is blocked
+    passed &= isSignalBlocked(0);
+
+    // This signal is not blocked
+    passed &= (isSignalBlocked(1) == 0);
+
+    // TODO: Add more tests here
+}
+
+int test_unblock_signal() {
+    int passed = 1;
+
+    block_signal(0);
+    // This signal is blocked
+    passed &= isSignalBlocked(0);
+
+    unblock_signal(0);
+
+    // This signal is no longer blocked
+    passed &= (isSignalBlocked(0) == 0);
+
+    // TODO: Add more tests here
+}
+#endif
